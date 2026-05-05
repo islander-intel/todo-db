@@ -1,0 +1,32 @@
+# ==============================================================================
+# simply todo - Docker Ignore Configuration (.dockerignore)
+# ==============================================================================
+# Project: simply todo
+# Component: todo-db
+# Description: Optimizes the Docker build context by excluding unnecessary files.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Git & Documentation
+# ------------------------------------------------------------------------------
+# Docker doesn't need your version history or your READMEs to run the database.
+.git
+.gitignore
+README.md
+LICENSE
+docs/
+
+# ------------------------------------------------------------------------------
+# 2. Local Environment
+# ------------------------------------------------------------------------------
+# We don't want to bake our local .env into the image itself; 
+# docker-compose handles injecting these at runtime.
+.env
+.env.example
+
+# ------------------------------------------------------------------------------
+# 3. IDE & OS Junk
+# ------------------------------------------------------------------------------
+.vscode
+.idea
+.DS_Store
