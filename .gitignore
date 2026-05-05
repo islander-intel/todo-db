@@ -1,0 +1,41 @@
+# ==============================================================================
+# simply todo - Git Ignore Configuration (.gitignore)
+# ==============================================================================
+# Project: simply todo
+# Component: todo-db
+# Description: Prevents local secrets and large database binaries from being 
+#              committed to the public repository.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment & Secrets
+# ------------------------------------------------------------------------------
+# Never commit actual credentials. We only commit .env.example.
+.env
+.env.local
+.env.*.local
+
+# ------------------------------------------------------------------------------
+# 2. Database Data (The Vault)
+# ------------------------------------------------------------------------------
+# If you mount your Docker volume to a local folder (e.g., ./pgdata), 
+# this ensures the raw binary data doesn't get pushed to Git.
+pgdata/
+postgres_data/
+
+# ------------------------------------------------------------------------------
+# 3. Operating System & IDE
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# ------------------------------------------------------------------------------
+# 4. Logs
+# ------------------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
