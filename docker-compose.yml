@@ -1,0 +1,88 @@
+# ==============================================================================
+# simply todo - Database Orchestration (docker-compose.yml)
+# ==============================================================================
+# Repository: todo-db
+# License: Apache 2.0
+# Purpose: Orchestrates the local PostgreSQL database vault, configures 
+#          persistent storage, and establishes the isolated local network.
+# ==============================================================================
+
+# Defines the overall project name for Docker's internal tagging
+name: simply-todo-db-infra
+
+services:
+  todo-db:
+    # --------------------------------------------------------------------------
+    # 1. Container Identity
+    # --------------------------------------------------------------------------
+    # This is the exact hostname the Backend Worker will use to connect.
+    # Connection string will look like: postgresql://user:pass@postgres-db:5432/db
+    container_name: postgres-db
+    
+    # --------------------------------------------------------------------------
+    # 2. Build Instructions
+    # --------------------------------------------------------------------------
+    # Context is set to '.' (the root of the repo) so Docker can access both 
+    # the docker/Dockerfile and the db/init.sql script during the build phase.
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      
+    # --------------------------------------------------------------------------
+    # 3. Environment Variables
+    # --------------------------------------------------------------------------
+    # Ingests the credentials securely from the .env file in the root directory.
+    # Requires POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB to be set.
+    env_file:
+      - .env
+      
+    # --------------------------------------------------------------------------
+    # 4. Port Mapping
+    # --------------------------------------------------------------------------
+    # Maps internal container port 5432 to external localhost port 5432.
+    # This is strictly for your local development and debugging via DBeaver/pgAdmin.
+    ports:
+      - "5432:5432"
+      
+    # --------------------------------------------------------------------------
+    # 5. Data Persistence
+    # --------------------------------------------------------------------------
+    # Binds the container's internal Postgres data directory to our Docker volume.
+    # Without this, all tasks would be permanently deleted when the container stops.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      
+    # --------------------------------------------------------------------------
+    # 6. Network Isolation
+    # --------------------------------------------------------------------------
+    # Attaches the database to a custom local network so future services
+    # (like the FastAPI backend) can securely reach it.
+    networks:
+      - todo-network
+      
+    # --------------------------------------------------------------------------
+    # 7. Health Validation (Logging & Stability)
+    # --------------------------------------------------------------------------
+    # Continuously pings the database using pg_isready to verify it is actively 
+    # accepting connections. Other containers can be set to wait for this to be 
+    # "healthy" before they attempt to start.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ==============================================================================
+# Global Definitions (Volumes & Networks)
+# ==============================================================================
+
+# Defines the persistent volume on your host machine.
+volumes:
+  pgdata:
+    name: simply-todo-pgdata
+
+# Defines the custom bridge network for inter-container communication.
+networks:
+  todo-network:
+    name: simply-todo-network
+    driver: bridge
